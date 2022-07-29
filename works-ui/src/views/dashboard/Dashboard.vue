@@ -2,13 +2,7 @@
   <div style="width: 100%">
     <a-row id="content-header-row">
       <a-col flex="100%" class="dashboard-a-col-one">
-        <a-button
-          type="primary"
-          ghost
-          shape="round"
-          size="medium"
-          @click="refresh(true)"
-        >
+        <a-button type="primary" ghost shape="round" size="medium" @click="refresh(true)">
           <template #icon><ReloadOutlined /></template>
           {{ $t("label.fetch.latest") }}
         </a-button>
@@ -23,26 +17,11 @@
             <a-col flex="100%" class="dashboard-a-col">
               <a-card :loading="loading" :title="$t('label.status.server')">
                 <a-steps :current="dashboardStep" :status="stepStatus">
-                  <a-step
-                    :title="$t('label.status.worksapi')"
-                    :description="descStep0"
-                  />
-                  <a-step
-                    :title="$t('label.status.mold')"
-                    :description="descStep1"
-                  />
-                  <a-step
-                    :title="$t('label.status.dc')"
-                    :description="descStep2"
-                  />
-                  <a-step
-                    :title="$t('label.status.ad')"
-                    :description="descStep3"
-                  />
-                  <a-step
-                    :title="$t('label.status.guac')"
-                    :description="descStep4"
-                  />
+                  <a-step :title="$t('label.status.worksapi')" :description="descStep0" />
+                  <a-step :title="$t('label.status.mold')" :description="descStep1" />
+                  <a-step :title="$t('label.status.dc')" :description="descStep2" />
+                  <a-step :title="$t('label.status.ad')" :description="descStep3" />
+                  <!-- <a-step :title="$t('label.status.guac')" :description="descStep4" /> -->
                 </a-steps>
               </a-card>
             </a-col>
@@ -120,24 +99,12 @@
         <a-col flex="100%">
           <a-row :gutter="8" type="flex">
             <a-col flex="50%" class="dashboard-a-col">
-              <a-card
-                :title="$t('label.workspace.count')"
-                class="dashboard-a-card-cl"
-                hoverable
-                @click="$router.push({ name: 'Workspace' })"
-              >
-                <span style="font-size: 80px; align: middle">{{
-                  workspaceCount
-                }}</span>
+              <a-card :title="$t('label.workspace.count')" class="dashboard-a-card-cl" hoverable @click="$router.push({ name: 'Workspace' })">
+                <span style="font-size: 80px; align: middle">{{ workspaceCount }}</span>
               </a-card>
             </a-col>
             <a-col flex="50%" class="dashboard-a-col">
-              <a-card
-                :title="$t('label.desktop.count')"
-                class="dashboard-a-card-cl"
-                hoverable
-                @click="$router.push({ name: 'VirtualMachine' })"
-              >
+              <a-card :title="$t('label.desktop.count')" class="dashboard-a-card-cl" hoverable @click="$router.push({ name: 'VirtualMachine' })">
                 <span style="font-size: 80px">{{ desktopVmCount }}</span>
               </a-card>
             </a-col>
@@ -154,22 +121,12 @@
           </a-row>
           <a-row :gutter="8" type="flex">
             <a-col flex="50%" class="dashboard-a-col">
-              <a-card
-                :title="$t('label.account.count')"
-                class="dashboard-a-card-cl"
-                hoverable
-                @click="$router.push({ name: 'Account' })"
-              >
+              <a-card :title="$t('label.account.count')" class="dashboard-a-card-cl" hoverable @click="$router.push({ name: 'Account' })">
                 <span style="font-size: 80px">{{ accountCount }}</span>
               </a-card>
             </a-col>
             <a-col flex="50%" class="dashboard-a-col">
-              <a-card
-                :title="$t('label.desktop.connected.count')"
-                class="dashboard-a-card-cl"
-                hoverable
-                @click="$router.push({ name: 'VirtualMachine' })"
-              >
+              <a-card :title="$t('label.desktop.connected.count')" class="dashboard-a-card-cl" hoverable @click="$router.push({ name: 'VirtualMachine' })">
                 <span style="font-size: 80px">{{ desktopConCount }}</span>
               </a-card>
             </a-col>
@@ -294,7 +251,7 @@ export default defineComponent({
             const data = response.data.result;
             this.workspaceCount = data.workspaceCount;
             this.desktopVmCount = data.instanceCount;
-            this.accountCount = data.usersCount;
+            this.accountCount = data.usersCount - 3;
             this.desktopConCount = data.connectedCount;
             this.appVmCount = "0";
             this.appConCount = "0";

@@ -4,28 +4,18 @@
       <a-layout-header id="content-header">
         <div id="content-header-body">
           <a-row id="content-header-row">
-            <!-- 오른쪽 경로 -->
+            <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath :paths="[$t('label.users')]" />
-              <a-button
-                shape="round"
-                style="margin-left: 20px"
-                size="small"
-                @click="refresh()"
-              >
+              <a-button shape="round" style="margin-left: 20px" size="small" @click="refresh()">
                 <template #icon><ReloadOutlined /></template>
                 {{ $t("label.refresh") }}
               </a-button>
             </a-col>
-            <!-- 왼쪽 액션 -->
+            <!-- 오른쪽 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <Actions
-                  v-if="actionFrom === 'ACList'"
-                  :action-from="actionFrom"
-                  :multi-select-list="multiSelectList"
-                  @fetchData="refresh"
-                />
+                <Actions v-if="actionFrom === 'ACList'" :action-from="actionFrom" :multi-select-list="multiSelectList" @fetchData="refresh" />
                 <!-- <a-tooltip placement="bottom">
                   <template #title>{{
                     $t("tooltip.account.download.csv")
@@ -46,7 +36,7 @@
                   <a-button
                     shape="circle"
                     style="margin-left: 10px"
-                    @click="showUploadModal(true)"
+                    @click="showUploadModal"
                   >
                     <UploadOutlined />
                   </a-button>
@@ -55,8 +45,12 @@
                   type="primary"
                   shape="round"
                   style="margin-left: 10px"
-                  @click="showAddModal(true)"
-                  >{{ $t("label.user.add") }}
+                  @click="
+                    () => {
+                      addModalView = true;
+                    }
+                  "
+                  >{{ $t("label.account.create") }}
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -68,129 +62,65 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountList
-            ref="listRefreshCall"
-            @actionFromChange="actionFromChange"
-            @downloadListSetting="downloadListSetting"
-          />
+          <AccountList ref="listRefreshCall" @actionFromChange="actionFromChange" @downloadListSetting="downloadListSetting" />
         </div>
       </a-layout-content>
     </a-layout>
     <!-- ADD MODAL START  -->
-    <a-modal v-model:visible="addVisible" :title="$t('label.user.add')">
-      <template #footer>
-        <a-button key="close" @click="showAddModal(false)">{{
-          $t("label.cancel")
-        }}</a-button>
-        <a-button
-          key="submit"
-          type="primary"
-          :loading="addLoading"
-          @click="putUser"
-          >{{ $t("label.ok") }}</a-button
-        >
-      </template>
-      <a-form
-        ref="formRef"
-        :model="formState"
-        :rules="rules"
-        layout="vertical"
-        autocomplete="off"
-      >
+    <a-modal
+      v-model:visible="addModalView"
+      :title="$t('label.account.create')"
+      :confirm-loading="confirmLoading"
+      :ok-text="$t('label.ok')"
+      :cancel-text="$t('label.cancel')"
+      @cancel="handleCancel"
+      @ok="createAccount"
+    >
+      <a-form :ref="formRef" :model="form" :rules="rules" layout="vertical" autocomplete="off">
         <a-form-item has-feedback name="account" :label="$t('label.account')">
-          <a-input
-            v-model:value="formState.account"
-            :placeholder="$t('tooltip.user.account')"
-          />
+          <a-input v-model:value="form.account" :placeholder="$t('placeholder.user.account')" />
         </a-form-item>
         <a-row :gutter="12">
           <a-col :md="24" :lg="12">
-            <a-form-item
-              has-feedback
-              name="lastName"
-              :label="$t('label.lastname')"
-            >
-              <a-input
-                v-model:value="formState.lastName"
-                :placeholder="$t('tooltip.user.lastname')"
-                class="addmodal-aform-item-div"
-              />
+            <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
+              <a-input v-model:value="form.lastName" :placeholder="$t('placeholder.user.lastname')" class="addmodal-aform-item-div" />
             </a-form-item>
           </a-col>
           <a-col :md="24" :lg="12">
-            <a-form-item
-              has-feedback
-              name="firstName"
-              :label="$t('label.firstname')"
-            >
-              <a-input
-                v-model:value="formState.firstName"
-                :placeholder="$t('tooltip.user.firstname')"
-              />
+            <a-form-item has-feedback name="firstName" :label="$t('label.firstname')">
+              <a-input v-model:value="form.firstName" :placeholder="$t('placeholder.user.firstname')" />
             </a-form-item>
           </a-col>
         </a-row>
         <a-row :gutter="12">
           <a-col :md="24" :lg="12">
-            <a-form-item
-              has-feedback
-              name="password"
-              :label="$t('label.password')"
-              :label-col="{ span: 12 }"
-            >
-              <a-input-password
-                v-model:value="formState.password"
-                :placeholder="$t('tooltip.user.password')"
-              />
+            <a-form-item has-feedback name="password" :label="$t('label.password')" :label-col="{ span: 12 }">
+              <a-input-password v-model:value="form.password" :placeholder="$t('placeholder.user.password')" />
             </a-form-item>
           </a-col>
           <a-col :md="24" :lg="12">
-            <a-form-item
-              has-feedback
-              name="passwordCheck"
-              :label="$t('label.passwordCheck')"
-              :label-col="{ span: 12 }"
-            >
-              <a-input-password
-                v-model:value="formState.passwordCheck"
-                :placeholder="$t('tooltip.user.passwordCheck')"
-              />
+            <a-form-item has-feedback name="passwordCheck" :label="$t('label.passwordCheck')" :label-col="{ span: 12 }">
+              <a-input-password v-model:value="form.passwordCheck" :placeholder="$t('placeholder.user.passwordCheck')" />
             </a-form-item>
           </a-col>
         </a-row>
         <a-form-item name="email" :label="$t('label.email')">
-          <a-input
-            v-model:value="formState.email"
-            :placeholder="$t('tooltip.user.email')"
-            class="addmodal-aform-item-div"
-          />
+          <a-input v-model:value="form.email" :placeholder="$t('placeholder.user.email')" class="addmodal-aform-item-div" />
         </a-form-item>
         <a-form-item name="phone" :label="$t('label.phone')">
-          <a-input
-            v-model:value="formState.phone"
-            :placeholder="$t('tooltip.user.phone')"
-            class="addmodal-aform-item-div"
-          />
+          <a-input v-model:value="form.phone" :placeholder="$t('placeholder.user.phone')" class="addmodal-aform-item-div" />
         </a-form-item>
         <a-form-item name="department" :label="$t('label.department')">
-          <a-input
-            v-model:value="formState.department"
-            :placeholder="$t('tooltip.user.department')"
-            class="addmodal-aform-item-div"
-          />
+          <a-input v-model:value="form.department" :placeholder="$t('placeholder.user.department')" class="addmodal-aform-item-div" />
         </a-form-item>
         <a-form-item name="title" :label="$t('label.title')">
-          <a-input
-            v-model:value="formState.title"
-            :placeholder="$t('tooltip.user.title')"
-            class="addmodal-aform-item-div"
-          />
+          <a-input v-model:value="form.title" :placeholder="$t('placeholder.user.title')" class="addmodal-aform-item-div" />
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- ADD MODAL END  -->
     <a-modal
-      v-model:visible="uploadVisible"
+      v-model:visible="addUploadModalView"
       width="800px"
       :title="$t('label.user.csv.upload')"
       :ok-text="$t('label.ok')"
@@ -198,17 +128,8 @@
       @cancel="showUploadModal(false)"
       @ok="handleSubmit()"
     >
-      <a-alert
-        :message="modalConfirm"
-        :description="modalDescription"
-        type="info"
-        show-icon
-      />
-      <a-upload-dragger
-        :file-list="fileList"
-        @remove="handleRemove"
-        :before-upload="beforeUpload"
-      >
+      <a-alert :message="modalConfirm" :description="modalDescription" type="info" show-icon />
+      <a-upload-dragger :file-list="fileList" @remove="handleRemove" :before-upload="beforeUpload">
         <p class="ant-upload-drag-icon">
           <inbox-outlined />
         </p>
@@ -217,14 +138,7 @@
         </p>
       </a-upload-dragger>
       <br />
-      <a-table
-        size="small"
-        :loading="uploadCsvTableLoading"
-        :columns="UserListColumns"
-        :pagination="pagination"
-        :data-source="dataList"
-        :scroll="{ y: 780 }"
-      >
+      <a-table size="small" :loading="uploadCsvTableLoading" :columns="UserListColumns" :pagination="pagination" :data-source="dataList" :scroll="{ y: 780 }">
       </a-table>
     </a-modal>
   </div>
@@ -242,139 +156,12 @@ export default defineComponent({
     Actions,
   },
   props: {},
-  setup() {
-    const addVisible = ref(false);
-    const uploadVisible = ref(false);
-    const checkDupl = ref(false);
-    const showAddModal = (state) => {
-      addVisible.value = state;
-    };
-    const showUploadModal = (state) => {
-      uploadVisible.value = state;
-    };
-    const formRef = ref();
-    const formState = reactive({
-      account: "",
-      firstName: "",
-      lastName: "",
-      password: "",
-      passwordCheck: "",
-      email: "",
-      userGroup: "",
-      phone: "",
-      title: "",
-      department: "",
-    });
-    let validateAccount = async (rule, value) => {
-      let lengthCheck = value.length > rule.max ? true : false; //길이체크
-      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
-      // let containsEngUpper = /[A-Z]/.test(value); 대문자
-      // let containsNumber = /[0-9]/.test(value);
-      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
-      let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
-      let containsEngNum = /^[a-zA-Z0-9]+$/.test(value);
-      if (
-        value === "" ||
-        containsHangle ||
-        lengthCheck ||
-        containsSpecial ||
-        !containsEngNum
-      ) {
-        return Promise.reject();
-      } else {
-        return Promise.resolve();
-      }
-    };
-    let validateName = async (rule, value) => {
-      let lengthCheck = value.length > rule.max ? true : false; //길이체크
-      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
-      // let containsEngUpper = /[A-Z]/.test(value); 대문자
-      // let containsNumber = /[0-9]/.test(value);
-      // let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
-      // let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
-      let containsHanEngNum = /^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]+$/.test(value);
-      if (value === "" || lengthCheck || !containsHanEngNum) {
-        return Promise.reject();
-      } else {
-        return Promise.resolve();
-      }
-    };
-    let validatePass = async (rule, value) => {
-      let lengthCheck = value.length >= rule.min ? true : false; //길이체크
-      let containsEng = /[a-zA-Z]/.test(value); // 대소문자
-      //let containsEngUpper = /[A-Z]/.test(value); 대문자
-      let containsNumber = /[0-9]/.test(value);
-      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
-      if (
-        value === "" ||
-        !containsEng ||
-        !containsNumber ||
-        !containsSpecial ||
-        !lengthCheck
-      ) {
-        return Promise.reject();
-      } else {
-        if (formState.passwordCheck !== "") {
-          formRef.value.validateFields("passwordCheck");
-        }
-        return Promise.resolve();
-      }
-    };
-
-    let validatePass2 = async (rule, value) => {
-      if (value !== formState.password) {
-        return Promise.reject();
-      }
-    };
-    const rules = {
-      account: [
-        { required: true, validator: validateAccount, trigger: "change" },
-        { max: 32 },
-      ],
-      firstName: [
-        { required: true, validator: validateName, trigger: "change" },
-        { max: 32 },
-      ],
-      lastName: [
-        { required: true, validator: validateName, trigger: "change" },
-        { max: 32 },
-      ],
-      password: {
-        min: 7,
-        required: true,
-        validator: validatePass,
-        trigger: "change",
-      },
-      passwordCheck: {
-        required: true,
-        validator: validatePass2,
-        trigger: "change",
-      },
-      email: {
-        required: false,
-        type: "email",
-      },
-      phone: {
-        required: false,
-        pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
-      },
-      title: [{ required: false }, { max: 32 }],
-      department: [{ required: false }, { max: 32 }],
-    };
-    return {
-      formRef,
-      formState,
-      rules,
-      addVisible,
-      uploadVisible,
-      showAddModal,
-      showUploadModal,
-      checkDupl,
-    };
-  },
+  setup() {},
   data() {
     return {
-      addLoading: ref(false),
+      addModalView: ref(false),
+      addUploadModalView: ref(false),
+      confirmLoading: ref(false),
       actionFrom: ref("AC"),
       multiSelectList: ref([]),
       fileList: ref([]),
@@ -385,11 +172,10 @@ export default defineComponent({
       modalConfirm: this.$t("message.account.file.upload.confirm"),
       modalDescription: this.$t("message.account.file.upload.description"),
       pagination: {
-        // pageSize: 10,
+        pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
-        showTotal: (total) =>
-          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       UserListColumns: [
@@ -439,23 +225,92 @@ export default defineComponent({
     };
   },
   created() {
-    this.rules.account[0].message = this.$t("input.user.account");
-    this.rules.firstName[0].message = this.$t("input.user.firstname");
-    this.rules.lastName[0].message = this.$t("input.user.lastname");
-    this.rules.password.message = this.$t("input.user.password");
-    this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
-    this.rules.email.message = this.$t("input.user.email");
-    this.rules.phone.message = this.$t("input.user.phone");
-    this.rules.title[0].message = this.$t("input.user.title");
-    this.rules.department[0].message = this.$t("input.user.department");
-
-    this.rules.account[1].message = this.$t("input.max.32");
-    this.rules.title[1].message = this.$t("input.max.32");
-    this.rules.firstName[1].message = this.$t("input.max.32");
-    this.rules.lastName[1].message = this.$t("input.max.32");
-    this.rules.department[1].message = this.$t("input.max.32");
+    this.initForm();
   },
   methods: {
+    initForm() {
+      this.formRef = ref();
+      this.form = reactive({
+        email: "",
+        phone: "",
+        title: "",
+        department: "",
+      });
+      this.rules = reactive({
+        account: { max: 32, required: true, validator: this.validateAccount, trigger: "change", message: this.$t("input.user.account") },
+        firstName: { max: 32, required: true, validator: this.validateName, trigger: "change", message: this.$t("input.user.firstname") },
+        lastName: { max: 32, required: true, validator: this.validateName, trigger: "change", message: this.$t("input.user.lastname") },
+        password: { min: 7, required: true, validator: this.validatePass, trigger: "change", message: this.$t("input.user.password") },
+        passwordCheck: { required: true, validator: this.validatePassCheck, trigger: "change", message: this.$t("input.user.passwordCheck") },
+        email: { required: false, type: "email", message: this.$t("input.user.email") },
+        phone: { required: false, pattern: /^\d{2,3}-\d{3,4}-\d{4}$/, message: this.$t("input.user.phone") },
+        title: { max: 32, required: false, message: this.$t("input.user.title") },
+        department: { max: 32, required: false, message: this.$t("input.user.department") },
+      });
+    },
+    async validateAccount(rule, value) {
+      let lengthCheck = value.length > rule.max ? true : false; //길이체크
+      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      // let containsEngUpper = /[A-Z]/.test(value); 대문자
+      // let containsNumber = /[0-9]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
+      let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
+      let containsEngNum = /^[a-zA-Z0-9]+$/.test(value);
+      if (!value || value.length === 0 || containsHangle || lengthCheck || containsSpecial || !containsEngNum) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    },
+    async validateName(rule, value) {
+      let lengthCheck = value.length > rule.max ? true : false; //길이체크
+      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      // let containsEngUpper = /[A-Z]/.test(value); 대문자
+      // let containsNumber = /[0-9]/.test(value);
+      // let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
+      // let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
+      let containsHanEngNum = /^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]+$/.test(value);
+      if (!value || value.length === 0 || lengthCheck || !containsHanEngNum) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    },
+    async validatePass(rule, value) {
+      let lengthCheck = value.length >= rule.min ? true : false; //길이체크
+      let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      //let containsEngUpper = /[A-Z]/.test(value); 대문자
+      let containsNumber = /[0-9]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
+      if (!value || value.length === 0 || !containsEng || !containsNumber || !containsSpecial || !lengthCheck) {
+        return Promise.reject();
+      } else {
+        if (this.form.passwordCheck !== "") {
+          this.formRef.value.validateFields("passwordCheck");
+        }
+
+        return Promise.resolve();
+      }
+    },
+    async validatePassCheck(rule, value) {
+      if (value !== this.form.password) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    },
+    showAddModal() {
+      this.addModalView = true;
+    },
+    showUploadModal() {
+      this.addUploadModalView = true;
+    },
+    handleCancel() {
+      this.addModalView = false;
+      this.confirmLoading = false;
+      this.addUploadModalView = false;
+      this.refresh();
+    },
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
       const newFileList = this.fileList.slice();
@@ -528,13 +383,7 @@ export default defineComponent({
       var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       let link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download =
-        "사용자 목록(" +
-        new Date(+new Date() + 3240 * 10000)
-          .toISOString()
-          .replace("T", " ")
-          .replace(/\..*/, "") +
-        ").csv";
+      link.download = "사용자 목록(" + new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, "") + ").csv";
       link.click();
     },
     refresh() {
@@ -547,52 +396,53 @@ export default defineComponent({
         this.multiSelectList = obj;
       }, 100);
     },
-    putUser() {
+    createAccount() {
+      console.log("this.form :>> ", this.form);
       let params = new URLSearchParams();
-      params.append("username", this.formState.account);
-      params.append("firstName", this.formState.firstName);
-      params.append("lastName", this.formState.lastName);
-      params.append("password", this.formState.password);
-      params.append("email", this.formState.email);
-      params.append("phone", this.formState.phone);
-      params.append("title", this.formState.title);
-      params.append("department", this.formState.department);
+      params.append("username", this.form.account);
+      params.append("firstName", this.form.firstName);
+      params.append("lastName", this.form.lastName);
+      params.append("password", this.form.password);
+      params.append("email", this.form.email);
+      params.append("phone", this.form.phone);
+      params.append("title", this.form.title);
+      params.append("department", this.form.department);
 
       //console.log(params);
-      this.formRef
+      this.formRef.value
         .validate()
         .then(() => {
-          this.addLoading = true;
+          this.confirmLoading = true;
           this.$worksApi //이름 중복 확인 체크
-            .get("/api/v1/user/" + this.formState.account)
+            .get("/api/v1/user/" + this.form.account)
             .then((response) => {
               if (response.status === 200) {
                 //중복일 때
                 this.$message.error(this.$t("message.name.dupl"));
+                this.confirmLoading = false;
               }
             })
             .catch((error) => {
               //중복 이름 없을 때
-              this.$message.loading(this.$t("message.user.createing"), 1);
+              this.$message.loading(this.$t("message.user.createing"), 0);
               this.$worksApi
                 .put("/api/v1/user", params)
                 .then((response) => {
                   //console.log(response.status);
+                  this.$message.destroy();
                   if (response.status === 200) {
-                    this.$message.loading(
-                      this.$t("message.user.create.success"),
-                      1
-                    );
+                    this.$message.success(this.$t("message.user.create.success"), 5);
                   } else {
                     this.$message.error(this.$t("message.user.create.fail"));
                   }
                 })
                 .catch((error) => {
+                  this.$message.destory();
                   this.$message.error(this.$t("message.user.create.fail"));
                   console.log("error", error);
                 })
                 .finally(() => {
-                  this.fetch();
+                  this.handleCancel();
                 });
             });
         })
@@ -600,12 +450,6 @@ export default defineComponent({
           console.log("error", error);
           //message.error(error);
         });
-    },
-    fetch() {
-      this.addLoading = false;
-      this.showAddModal(false);
-      this.showUploadModal(false);
-      this.$refs.listRefreshCall.fetchRefresh();
     },
   },
 });

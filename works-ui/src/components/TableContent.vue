@@ -1,38 +1,20 @@
 <template>
-  <a-button
-    v-if="state.addButtonBool"
-    type="dashed"
-    block
-    style="padding-bottom: 10px"
-    :disabled="state.statusReadyBool"
-    @click="changeModal(tapName, true)"
-  >
+  <a-button v-if="state.addButtonBool" type="dashed" block style="padding-bottom: 10px" :disabled="state.statusReadyBool" @click="changeModal(tapName, true)">
     <PlusOutlined />
     {{ state.addButtontext }}
   </a-button>
 
   <a-alert
     v-if="state.statusReadyBool"
-    :message="
-      $t('message.workspace.test.status') + ' : ' + state.statusReadyMessage
-    "
+    :message="$t('message.workspace.test.status') + ' : ' + state.statusReadyMessage"
     :description="state.statusReadyDescription"
     type="info"
     show-icon
   />
 
   <!-- selection 시용시 일괄버튼 보여주는 영역 -->
-  <div
-    v-if="actionFrom === 'VMList' || actionFrom === 'WSUserList'"
-    style="padding-left: 20px; padding-top: 1px; text-align: left; height: 33px"
-  >
-    <Actions
-      v-if="vis"
-      :action-from="actionFrom"
-      :multi-select-list="state.selectedRows"
-      :ws-name="resource.workspaceInfo.name"
-      @fetchData="parentRefresh"
-    />
+  <div v-if="actionFrom === 'VMList' || actionFrom === 'WSUserList'" style="padding-left: 20px; padding-top: 1px; text-align: left; height: 33px">
+    <Actions v-if="vis" :action-from="actionFrom" :multi-select-list="state.selectedRows" :ws-name="resource.workspaceInfo.name" @fetchData="parentRefresh" />
   </div>
   <!-- selection 시용시 일괄버튼 보여주는 영역 -->
   <a-table
@@ -58,9 +40,7 @@
             {{ record.name }}
           </router-link>
         </span>
-        <span
-          v-else-if="actionFrom !== undefined && actionFrom === 'WSUserList'"
-        >
+        <span v-else-if="actionFrom !== undefined && actionFrom === 'WSUserList'">
           <router-link :to="{ path: '/accountDetail/' + record.name }">
             {{ record.name }}
           </router-link>
@@ -78,9 +58,7 @@
             v-if="editableData[record.name] && record.settable_type == 'S'"
             v-model:value="editableData[record.name][column.dataIndex]"
             style="width: 100%"
-            :options="
-              record.settable_value.split(',').map((item) => ({ value: item }))
-            "
+            :options="record.settable_value.split(',').map((item) => ({ value: item }))"
           ></a-select>
           <a-input
             v-else-if="editableData[record.name] && record.settable_type == 'T'"
@@ -96,62 +74,39 @@
         <a-popover placement="bottom">
           <template #content>
             <a-space direction="horizontal">
-              <Actions
-                :action-from="actionFrom"
-                :vm-info="record"
-                :ws-info="resource.workspaceInfo"
-                @fetchData="parentRefresh"
-              />
+              <Actions :action-from="actionFrom" :vm-info="record" :ws-info="resource.workspaceInfo" @fetchData="parentRefresh" />
             </a-space>
           </template>
           <MoreOutlined />
         </a-popover>
       </template>
-      <template
-        v-if="column.dataIndex === 'action' && actionFrom === 'WSUserList'"
-      >
-        <a-popconfirm
-          :title="$t('message.delete.confirm')"
-          :ok-text="$t('label.ok')"
-          :cancel-text="$t('label.cancel')"
-          @confirm="wsUserDel(record.name)"
-        >
+      <template v-if="column.dataIndex === 'action' && actionFrom === 'WSUserList'">
+        <a-popconfirm :title="$t('message.delete.confirm')" :ok-text="$t('label.ok')" :cancel-text="$t('label.cancel')" @confirm="wsUserDel(record.name)">
           <a-tooltip placement="bottom">
             <template #title>{{ $t("tooltip.destroy") }}</template>
             <a-button type="primary" shape="circle" danger size="small">
-              <template #icon><DeleteFilled /></template>
+              <template #icon>
+                <DeleteFilled />
+              </template>
             </a-button>
           </a-tooltip>
         </a-popconfirm>
       </template>
-      <template
-        v-if="column.dataIndex === 'i18N' && actionFrom === 'WSPolicyList'"
-      >
+      <template v-if="column.dataIndex === 'i18N' && actionFrom === 'WSPolicyList'">
         {{ $t(text) }}
       </template>
 
-      <template
-        v-if="column.dataIndex === 'action' && actionFrom === 'WSPolicyList'"
-      >
+      <template v-if="column.dataIndex === 'action' && actionFrom === 'WSPolicyList'">
         <span v-if="editableData[record.name]">
           <a-tooltip placement="bottom">
             <template #title>{{ $t("tooltip.destroy") }}</template>
-            <a-button
-              shape="circle"
-              @click="editCancel(record.name)"
-              size="small"
-            >
+            <a-button shape="circle" @click="editCancel(record.name)" size="small">
               <CloseCircleOutlined style="color: red" />
             </a-button>
           </a-tooltip>
-          &nbsp;
           <a-tooltip placement="bottom">
             <template #title>{{ $t("tooltip.save") }}</template>
-            <a-button
-              shape="circle"
-              @click="editSave(record.name)"
-              size="small"
-            >
+            <a-button shape="circle" @click="editSave(record.name)" size="small">
               <CheckCircleOutlined style="color: #52c41a" />
             </a-button>
           </a-tooltip>
@@ -159,11 +114,7 @@
         <span v-else>
           <a-tooltip placement="bottom">
             <template #title>{{ $t("tooltip.edit") }}</template>
-            <a-button
-              shape="circle"
-              @click="editAction(record.name)"
-              size="small"
-            >
+            <a-button shape="circle" @click="editAction(record.name)" size="small">
               <EditOutlined />
             </a-button>
           </a-tooltip>
@@ -171,9 +122,7 @@
       </template>
 
       <template v-if="column.dataIndex === 'owner_account_id'">
-        <router-link
-          :to="{ path: '/accountDetail/' + record.owner_account_id }"
-        >
+        <router-link :to="{ path: '/accountDetail/' + record.owner_account_id }">
           {{ record.owner_account_id }}
         </router-link>
       </template>
@@ -181,14 +130,13 @@
         <a-badge
           class="head-example"
           :color="
-            record.mold_status === 'Running'
+            ['Running'].includes(record.mold_status)
               ? 'green'
-              : record.mold_status === 'Stopping' ||
-                record.mold_status === 'Starting'
+              : ['Stopping', 'Starting'].includes(record.mold_status)
               ? 'blue'
-              : record.mold_status === 'Stopped'
+              : ['Stopped'].includes(record.mold_status)
               ? 'red'
-              : ''
+              : 'grey'
           "
           :text="
             record.mold_status === 'Running'
@@ -209,31 +157,13 @@
           <template #title>{{ record.handshake_status }}</template>
           <a-badge
             class="head-example"
-            :color="
-              record.handshake_status === 'Not Ready' ||
-              record.handshake_status === 'Pending'
-                ? 'red'
-                : record.handshake_status === 'Joining' ||
-                  record.handshake_status === 'Joined'
-                ? 'yellow'
-                : record.handshake_status === 'Ready'
-                ? 'green'
-                : 'red'
-            "
+            :color="['Joining', 'Joined'].includes(record.handshake_status) ? 'yellow' : record.handshake_status === 'Ready' ? 'green' : 'red'"
             :text="
-              record.handshake_status === 'Not Ready' ||
-              record.handshake_status === 'Pending'
-                ? $t('label.vm.status.initializing') +
-                  '(' +
-                  record.handshake_status +
-                  ')'
-                : record.handshake_status === 'Joining' ||
-                  record.handshake_status === 'Joined'
-                ? $t('label.vm.status.configuring') +
-                  '(' +
-                  record.handshake_status +
-                  ')'
-                : record.handshake_status === 'Ready'
+              ['Not Ready', 'Pending'].includes(record.handshake_status)
+                ? $t('label.vm.status.initializing') + '(' + record.handshake_status + ')'
+                : ['Joining', 'Joined'].includes(record.handshake_status)
+                ? $t('label.vm.status.configuring') + '(' + record.handshake_status + ')'
+                : ['Ready'].includes(record.handshake_status)
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "
@@ -258,13 +188,7 @@
         })
       }}
     </p>
-    <a-input-number
-      id="inputNumber"
-      v-model:value="selectedVmQuantity"
-      style="width: 100%; margin-top: 7px"
-      :title="'Desktop Quantity'"
-      :min="1"
-    />
+    <a-input-number id="inputNumber" v-model:value="selectedVmQuantity" style="width: 100%; margin-top: 7px" :title="'Desktop Quantity'" :min="1" />
   </a-modal>
 
   <a-modal
@@ -293,10 +217,7 @@
       :options="
         filteredOptions.map((item) => ({
           value: item.name,
-          label:
-            item.name === 'Guest'
-              ? '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name
-              : '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name,
+          label: item.name === 'Guest' ? '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name : '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name,
         }))
       "
     >
@@ -380,14 +301,11 @@ export default defineComponent({
         // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
-        showTotal: (total) =>
-          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       rowSelection: ref(null),
-      filteredOptions: computed(() =>
-        this.addAbleUserList.filter((o) => !this.selectedUser.includes(o.name))
-      ),
+      filteredOptions: computed(() => this.addAbleUserList.filter((o) => !this.selectedUser.includes(o.name))),
     };
   },
   created() {
@@ -444,17 +362,11 @@ export default defineComponent({
         } else {
           this.state.statusReadyBool = true;
           if (stat === "Not Ready") {
-            this.state.statusReadyMessage = this.$t(
-              "message.workspace.test.vmcreate"
-            );
+            this.state.statusReadyMessage = this.$t("message.workspace.test.vmcreate");
           } else if (stat === "Pending") {
-            this.state.statusReadyMessage = this.$t(
-              "message.workspace.test.initializing"
-            );
+            this.state.statusReadyMessage = this.$t("message.workspace.test.initializing");
           } else if (stat === "Joining" || stat === "Joined") {
-            this.state.statusReadyMessage = this.$t(
-              "message.workspace.test.configuring"
-            );
+            this.state.statusReadyMessage = this.$t("message.workspace.test.configuring");
           }
           this.state.statusReadyDescription = this.$t("message.workspace.test");
         }
@@ -481,53 +393,36 @@ export default defineComponent({
         {
           dataIndex: "name",
           key: "name",
-          // slots: { customRender: "nameRender" },
           title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "",
+          title: this.$t("label.action"),
           key: "action",
           dataIndex: "action",
-          align: "right",
-          width: "5%",
-          // slots: { customRender: "actionRender" },
+          width: "60px",
         },
         {
           title: this.$t("label.users"),
           dataIndex: "owner_account_id",
           key: "owner_account_id",
-          sorter: (a, b) =>
-            a.owner_account_id < b.owner_account_id
-              ? -1
-              : a.owner_account_id > b.owner_account_id
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "userRender" },
         },
         {
           title: this.$t("label.vm.state"),
           dataIndex: "mold_status",
           key: "mold_status",
-          sorter: (a, b) =>
-            a.mold_status < b.mold_status
-              ? -1
-              : a.mold_status > b.mold_status
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.mold_status < b.mold_status ? -1 : a.mold_status > b.mold_status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "vmStateRender" },
         },
         {
           title: this.$t("label.vm.ready.state"),
           dataIndex: "status",
           key: "status",
-          sorter: (a, b) =>
-            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
+          sorter: (a, b) => (a.status < b.status ? -1 : a.status > b.status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "vmReadyStateRender" },
         },
 
         // {
@@ -545,10 +440,7 @@ export default defineComponent({
         // },
       ];
 
-      if (
-        this.resource.instanceList !== undefined &&
-        this.resource.instanceList !== null
-      ) {
+      if (this.resource.instanceList !== undefined && this.resource.instanceList !== null) {
         this.dataList = this.resource.instanceList;
         this.dataList.forEach((value, index, array) => {
           this.dataList[index].key = index;
@@ -569,16 +461,13 @@ export default defineComponent({
           title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "accountNameRender" },
         },
         {
           title: this.$t("label.lastname"),
           dataIndex: "givenName",
           key: "givenName",
           width: "10%",
-          sorter: (a, b) =>
-            a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0,
-          // sortDirections: ["descend", "ascend"],
+          sorter: (a, b) => (a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0),
         },
         {
           title: this.$t("label.firstname"),
@@ -593,8 +482,7 @@ export default defineComponent({
           dataIndex: "title",
           key: "title",
           width: "15%",
-          sorter: (a, b) =>
-            a.title < b.title ? -1 : a.title > b.title ? 1 : 0,
+          sorter: (a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -602,12 +490,7 @@ export default defineComponent({
           dataIndex: "department",
           key: "department",
           width: "10%",
-          sorter: (a, b) =>
-            a.department < b.department
-              ? -1
-              : a.department > b.department
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.department < b.department ? -1 : a.department > b.department ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -615,28 +498,18 @@ export default defineComponent({
           dataIndex: "telephoneNumber",
           key: "telephoneNumber",
           width: "15%",
-          sorter: (a, b) =>
-            a.telephoneNumber < b.telephoneNumber
-              ? -1
-              : a.telephoneNumber > b.telephoneNumber
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.telephoneNumber < b.telephoneNumber ? -1 : a.telephoneNumber > b.telephoneNumber ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "",
+          title: this.$t("label.action"),
           key: "action",
           dataIndex: "action",
-          align: "right",
-          width: "5%",
-          // slots: { customRender: "deleteRender" },
+          width: "60px",
         },
       ];
       var userInWorkspaceList = [];
-      if (
-        this.resource.groupDetail.member !== undefined &&
-        this.resource.groupDetail.member !== null
-      ) {
+      if (this.resource.groupDetail.member !== undefined && this.resource.groupDetail.member !== null) {
         for (let str of this.resource.groupDetail.member) {
           userInWorkspaceList.push({ name: str.split(",")[0].split("CN=")[1] });
         }
@@ -646,11 +519,7 @@ export default defineComponent({
         .get("/api/v1/user")
         .then((response) => {
           if (response.status == 200) {
-            if (
-              response.data.result !== null &&
-              response.data.result.length !== 0 &&
-              response.data.result !== undefined
-            ) {
+            if (response.data.result !== null && response.data.result.length !== 0 && response.data.result !== undefined) {
               this.addAbleUserList = response.data.result.filter(function (o1) {
                 return !userInWorkspaceList.some(function (o2) {
                   return o1.name == o2.name;
@@ -685,7 +554,7 @@ export default defineComponent({
           key: "name",
           width: "20%",
           title: this.$t("label.name"),
-          sorter: (a, b) => a.name.length - b.name.length,
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           defaultSortOrder: "ascend",
           sortDirections: ["descend", "ascend"],
         },
@@ -710,21 +579,14 @@ export default defineComponent({
           title: this.$t("label.action"),
           dataIndex: "action",
           align: "center",
-          width: "10%",
+          width: "80px",
         },
       ];
-      if (
-        this.resource.workspacePolicy !== undefined &&
-        this.resource.workspacePolicy !== null
-      ) {
+      if (this.resource.workspacePolicy !== undefined && this.resource.workspacePolicy !== null) {
         if (this.tapName === "gpolicy") {
-          this.dataList = this.resource.workspacePolicy.filter(
-            (it) => it.type == "R"
-          );
+          this.dataList = this.resource.workspacePolicy.filter((it) => it.type == "R");
         } else if (this.tapName === "wpolicy") {
-          this.dataList = this.resource.workspacePolicy.filter(
-            (it) => it.type == "C"
-          );
+          this.dataList = this.resource.workspacePolicy.filter((it) => it.type == "C");
         }
       }
     },
@@ -750,18 +612,13 @@ export default defineComponent({
           title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // slots: { customRender: "stateRender" },
         },
       ];
       // 워크스페이스 네트워크 조회
-      if (
-        this.resource.networkInfo.network !== undefined &&
-        this.resource.networkInfo.network !== null
-      )
-        this.dataList = this.resource.networkInfo.network;
+      if (this.resource.networkInfo.network !== undefined && this.resource.networkInfo.network !== null) this.dataList = this.resource.networkInfo.network;
     },
     fetchDatadisk() {
       this.columns = [
@@ -792,18 +649,14 @@ export default defineComponent({
           title: this.$t("label.size"),
           dataIndex: "sizegb",
           key: "sizegb",
-          sorter: (a, b) =>
-            a.sizegb < b.sizegb ? -1 : a.sizegb > b.sizegb ? 1 : 0,
+          sorter: (a, b) => (a.sizegb < b.sizegb ? -1 : a.sizegb > b.sizegb ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ];
 
-      console.log(this.resource.instanceInstanceVolumeInfo.volume);
+      // console.log(this.resource.instanceInstanceVolumeInfo.volume);
       // 가상머신 데이터디스크 조회
-      if (
-        this.resource.instanceInstanceVolumeInfo.volume !== undefined &&
-        this.resource.instanceInstanceVolumeInfo.volume !== null
-      )
+      if (this.resource.instanceInstanceVolumeInfo.volume !== undefined && this.resource.instanceInstanceVolumeInfo.volume !== null)
         this.dataList = this.resource.instanceInstanceVolumeInfo.volume;
     },
     async funcDelay(delay) {
@@ -834,12 +687,13 @@ export default defineComponent({
       this.succCnt = 0;
     },
     //데스크톱 가상머신 개수선택해 추가
-    wsVmAdd() {
+    wsVmAdd(e) {
+      e.preventDefault();
       this.confirmLoading = true;
 
       this.sucMessage = "message.workspace.vm.add.success";
       this.failMessage = "message.workspace.vm.add.fail";
-      this.$message.loading(this.$t("message.workspace.vm.adding"), 100);
+      this.$message.loading(this.$t("message.workspace.vm.adding"), 0);
 
       let params = new URLSearchParams();
       params.append("uuid", this.$route.params.workspaceUuid);
@@ -873,13 +727,12 @@ export default defineComponent({
 
       this.sucMessage = "message.workspace.user.add.ok";
       this.failMessage = "message.workspace.user.add.fail";
-      this.$message.loading(this.$t("message.workspace.vm.user.adding"), 100);
+      this.$message.loading(this.$t("message.workspace.vm.user.adding"), 0);
 
       var apiUrl = "";
       const arrAsync = [];
       for (let val of this.selectedUser) {
-        apiUrl =
-          "/api/v1/group/" + this.resource.workspaceInfo.name + "/" + val;
+        apiUrl = "/api/v1/group/" + this.resource.workspaceInfo.name + "/" + val;
         arrAsync.push(this.promiseAction("put", apiUrl, null));
       }
       Promise.all(arrAsync)
@@ -900,11 +753,10 @@ export default defineComponent({
     wsUserDel(val) {
       this.sucMessage = "message.workspace.user.delete.ok";
       this.failMessage = "message.workspace.user.delete.fail";
-      this.$message.loading(this.$t("message.workspace.vm.user.deleting"), 100);
+      this.$message.loading(this.$t("message.workspace.vm.user.deleting"), 0);
 
       const arrAsync = [];
-      const apiUrl =
-        "/api/v1/group/" + this.resource.workspaceInfo.name + "/" + val;
+      const apiUrl = "/api/v1/group/" + this.resource.workspaceInfo.name + "/" + val;
       arrAsync.push(this.promiseAction("delete", apiUrl, null));
 
       Promise.all(arrAsync)
@@ -933,34 +785,22 @@ export default defineComponent({
       });
     },
     editAction(name) {
-      this.editableData[name] = cloneDeep(
-        this.dataList.filter((item) => name === item.name)[0]
-      );
+      this.editableData[name] = cloneDeep(this.dataList.filter((item) => name === item.name)[0]);
     },
     editCancel(name) {
       delete this.editableData[name];
     },
     async editSave(name) {
-      Object.assign(
-        this.dataList.filter((item) => name === item.name)[0],
-        this.editableData[name]
-      );
+      Object.assign(this.dataList.filter((item) => name === item.name)[0], this.editableData[name]);
 
-      console.log(
-        this.$route.params.workspaceUuid,
-        this.editableData[name].name,
-        this.editableData[name].value
-      );
+      // console.log(this.$route.params.workspaceUuid, this.editableData[name].name, this.editableData[name].value);
       let params = new URLSearchParams();
 
       params.append("policyName", this.editableData[name].name);
       params.append("policyValue", this.editableData[name].value);
 
       try {
-        const res = await this.$worksApi.patch(
-          "/api/v1/policy/" + this.$route.params.workspaceUuid,
-          params
-        );
+        const res = await this.$worksApi.patch("/api/v1/policy/" + this.$route.params.workspaceUuid, params);
         if (res.status == 200) {
           this.$message.success(
             this.$t("message.workspace.policy.data.update.success", {
@@ -990,5 +830,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

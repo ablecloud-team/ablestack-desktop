@@ -9,13 +9,7 @@
       </a-button>
     </div>
   </transition>
-  <a-drawer
-    placement="top"
-    :closable="false"
-    :height="drawerHeight"
-    :visible="showDrawerVisible"
-    @close="closeDrawer"
-  >
+  <a-drawer placement="top" :closable="false" :height="drawerHeight" :visible="showDrawerVisible" @close="closeDrawer">
     <UserClientSetting
       ref="userClientSetting"
       :client="client"
@@ -47,42 +41,18 @@
         />
       </a-col>
       <a-col flex="0 1 270px">
-        <a-button
-          id="ctrl"
-          @click="ctrlPressed = !ctrlPressed"
-          class="button-stickey"
-          :style="ctrlPressed ? altCtrlStyle : ''"
-        >
-          Ctrl
-        </a-button>
-        <a-button
-          id="alt"
-          @click="altPressed = !altPressed"
-          class="button-stickey"
-          :style="altPressed ? altCtrlStyle : ''"
-        >
-          Alt
-        </a-button>
-        <a-button id="del" @click="sendKeysym(65535)" class="button-stickey">
-          Del
-        </a-button>
-        <a-button id="esc" @click="sendKeysym(65307)" class="button-stickey">
-          Esc
-        </a-button>
-        <a-button id="tab" @click="sendKeysym(65289)" class="button-stickey">
-          Tab
-        </a-button>
+        <a-button id="ctrl" @click="ctrlPressed = !ctrlPressed" class="button-stickey" :style="ctrlPressed ? altCtrlStyle : ''"> Ctrl </a-button>
+        <a-button id="alt" @click="altPressed = !altPressed" class="button-stickey" :style="altPressed ? altCtrlStyle : ''"> Alt </a-button>
+        <a-button id="del" @click="sendKeysym(65535)" class="button-stickey"> Del </a-button>
+        <a-button id="esc" @click="sendKeysym(65307)" class="button-stickey"> Esc </a-button>
+        <a-button id="tab" @click="sendKeysym(65289)" class="button-stickey"> Tab </a-button>
       </a-col>
     </a-row>
   </div>
   <!-- </div> -->
 
   <div class="modal" v-if="alertShow">
-    <a-result
-      :status="resultStatus"
-      :title="title[status]"
-      :sub-title="text[status] || errorMessage"
-    >
+    <a-result :status="resultStatus" :title="title[status]" :sub-title="text[status] || errorMessage">
       <template #icon v-if="spinner">
         <loading-outlined />
       </template>
@@ -106,11 +76,8 @@ import dis from "@/client/display";
 import states from "@/client/states";
 import UserClientSetting from "./UserClientSetting.vue";
 
-const hostname =
-  process.env.VUE_APP_API_URL == ""
-    ? window.location.hostname
-    : process.env.VUE_APP_API_URL;
-const wsUrl = "ws://" + hostname + ":8088/";
+const hostname = process.env.VUE_APP_API_URL == "" ? window.location.hostname : process.env.VUE_APP_API_URL;
+const wsUrl = "ws://" + hostname + ":8081/";
 export default defineComponent({
   components: {
     UserClientSetting,
@@ -176,9 +143,7 @@ export default defineComponent({
       status: ref(null),
       title: {
         CONNECTING: this.$t("message.userdesktop.status.title.connecting"),
-        DISCONNECTING: this.$t(
-          "message.userdesktop.status.title.disconnecting"
-        ),
+        DISCONNECTING: this.$t("message.userdesktop.status.title.disconnecting"),
         DISCONNECTED: this.$t("message.userdesktop.status.title.disconnected"),
         UNSTABLE: this.$t("message.userdesktop.status.title.unstable"),
         WAITING: this.$t("message.userdesktop.status.title.waiting"),
@@ -220,8 +185,7 @@ export default defineComponent({
       this.appEl.scrollLeft = val;
     },
     inputText(val) {
-      if (val)
-        this.inputTextTarget = document.getElementById("inputTextTarget");
+      if (val) this.inputTextTarget = document.getElementById("inputTextTarget");
     },
     ctrlPressed(val) {
       if (val) this.keyboard.press(65507);
@@ -307,15 +271,11 @@ export default defineComponent({
       this.token.connection.settings.dpi = browerSize[2];
 
       //파라미터로 넘어온 값 파라미터값 복호화
-      const cipher = this.$CryptoJS.AES.decrypt(
-        atob(this.$route.params.crypto),
-        this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
-        {
-          iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
-          padding: this.$CryptoJS.pad.Pkcs7,
-          mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
-        }
-      );
+      const cipher = this.$CryptoJS.AES.decrypt(atob(this.$route.params.crypto), this.$CryptoJS.enc.Utf8.parse(this.cryptKey), {
+        iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+        padding: this.$CryptoJS.pad.Pkcs7,
+        mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+      });
       const decrypted = cipher.toString(this.$CryptoJS.enc.Utf8);
       // console.log('decrypted :>> ', decrypted);
       //복호화 한 값 JSON 형식으로 변경 후 키,값 구분하여 token에 세팅
@@ -325,8 +285,7 @@ export default defineComponent({
       }
 
       if (
-        Math.floor(Date.now() / 1000) -
-          parseInt(this.token.connection.settings.timestamp) >
+        Math.floor(Date.now() / 1000) - parseInt(this.token.connection.settings.timestamp) >
         30
         //30초로 변경 예정
       ) {
@@ -447,10 +406,7 @@ export default defineComponent({
 
       //파일 다운로드 이벤트 발생 시
       this.client.onfile = (stream, mimetype, filename) => {
-        if (
-          this.token.connection.settings["enable-drive"] === "false" ||
-          this.token.connection.settings["disable-download"] === "true"
-        ) {
+        if (this.token.connection.settings["enable-drive"] === "false" || this.token.connection.settings["disable-download"] === "true") {
           this.$message.error(this.$t("message.file.download.permission.denied"));
           return false;
         }
@@ -470,11 +426,7 @@ export default defineComponent({
           this.$notification.open({
             key,
             message: this.$t("label.file.download"),
-            description:
-              "[" +
-              this.$refs.userClientSetting.bytesToSize(br.getLength()) +
-              "] " +
-              filename,
+            description: "[" + this.$refs.userClientSetting.bytesToSize(br.getLength()) + "] " + filename,
             placement: "bottomRight",
             duration: 0,
             style: {
@@ -584,10 +536,7 @@ export default defineComponent({
             type: "DIRECTORY",
           },
         };
-        this.$refs.userClientSetting.updateDirectory(
-          managedFilesystem,
-          managedFilesystem.root
-        );
+        this.$refs.userClientSetting.updateDirectory(managedFilesystem, managedFilesystem.root);
       };
       window.addEventListener("resize", (e) => {
         // console.log(
@@ -683,24 +632,15 @@ export default defineComponent({
       //   ["touchstart", "touchmove", "touchend"],
       //   this.handleTouchEvent
       // );
-      this.touchScreen.offEach(
-        ["mousedown", "mousemove", "mouseup"],
-        this.handleEmulatedMouseEvent
-      );
-      this.touchPad.offEach(
-        ["mousedown", "mousemove", "mouseup"],
-        this.handleEmulatedMouseEvent
-      );
+      this.touchScreen.offEach(["mousedown", "mousemove", "mouseup"], this.handleEmulatedMouseEvent);
+      this.touchPad.offEach(["mousedown", "mousemove", "mouseup"], this.handleEmulatedMouseEvent);
 
       if (emulateAbsoluteMouse) {
         // this.touch.onEach(
         //   ["touchstart", "touchmove", "touchend"],
         //   this.handleTouchEvent
         // );
-        this.touchScreen.onEach(
-          ["mousedown", "mousemove", "mouseup"],
-          this.handleEmulatedMouseEvent
-        );
+        this.touchScreen.onEach(["mousedown", "mousemove", "mouseup"], this.handleEmulatedMouseEvent);
 
         this.touchScreen.mousedown = (event) => {
           // console.log(event);
@@ -776,10 +716,7 @@ export default defineComponent({
         //   ["touchstart", "touchmove", "touchend"],
         //   this.handleTouchEvent
         // );
-        this.touchPad.onEach(
-          ["mousedown", "mousemove", "mouseup"],
-          this.handleEmulatedMouseEvent
-        );
+        this.touchPad.onEach(["mousedown", "mousemove", "mouseup"], this.handleEmulatedMouseEvent);
         // console.log(this.touchPad);
         this.touchPad.mousedown = (event) => {
           // console.log(event);
@@ -949,10 +886,8 @@ export default defineComponent({
         return;
       }
       // Determine mouse position within view
-      const mouse_view_x =
-        mouseState.x + this.displayEl.offsetLeft - main.scrollLeft;
-      const mouse_view_y =
-        mouseState.y + this.displayEl.offsetTop - main.scrollTop;
+      const mouse_view_x = mouseState.x + this.displayEl.offsetLeft - main.scrollLeft;
+      const mouse_view_y = mouseState.y + this.displayEl.offsetTop - main.scrollTop;
 
       // Determine viewport dimensions
       const view_width = main.offsetWidth;
@@ -960,14 +895,12 @@ export default defineComponent({
 
       // Determine scroll amounts based on mouse position relative to document
       let scroll_amount_x;
-      if (mouse_view_x > view_width)
-        scroll_amount_x = mouse_view_x - view_width;
+      if (mouse_view_x > view_width) scroll_amount_x = mouse_view_x - view_width;
       else if (mouse_view_x < 0) scroll_amount_x = mouse_view_x;
       else scroll_amount_x = 0;
 
       let scroll_amount_y;
-      if (mouse_view_y > view_height)
-        scroll_amount_y = mouse_view_y - view_height;
+      if (mouse_view_y > view_height) scroll_amount_y = mouse_view_y - view_height;
       else if (mouse_view_y < 0) scroll_amount_y = mouse_view_y;
       else scroll_amount_y = 0;
 
@@ -987,9 +920,10 @@ export default defineComponent({
       this.client.sendSize(width, height);
 
       // 세팅 drawer 높이 변경
-      if (width > 1125) this.drawerHeight = 120;
-      else if (width > 680 && width <= 1125) this.drawerHeight = 200;
-      else if (width > 467 && width <= 680) this.drawerHeight = 280;
+      console.log('width :>> ', window.innerWidth);
+      if (window.innerWidth > 1190) this.drawerHeight = 120;
+      else if (window.innerWidth > 715 && window.innerWidth <= 1190) this.drawerHeight = 200;
+      else if (window.innerWidth > 500 && window.innerWidth <= 715) this.drawerHeight = 280;
       else this.drawerHeight = 440;
 
       // if (this.onScreenKeyboard) {
@@ -1009,14 +943,9 @@ export default defineComponent({
           this.client.sendSize(window.innerWidth, window.innerHeight);
         }
 
-        this.$store.state.client.maxScale = Math.max(
-          this.$store.state.client.minScale,
-          3
-        );
-        if (this.display.getScale() > this.$store.state.client.minScale)
-          this.$store.state.client.scale = this.$store.state.client.minScale;
-        else if (this.display.getScale() > this.$store.state.client.maxScale)
-          this.$store.state.client.scale = this.$store.state.client.maxScale;
+        this.$store.state.client.maxScale = Math.max(this.$store.state.client.minScale, 3);
+        if (this.display.getScale() > this.$store.state.client.minScale) this.$store.state.client.scale = this.$store.state.client.minScale;
+        else if (this.display.getScale() > this.$store.state.client.maxScale) this.$store.state.client.scale = this.$store.state.client.maxScale;
         else this.$store.state.client.scale = this.$store.state.client.minScale;
 
         // console.log(
@@ -1079,15 +1008,13 @@ export default defineComponent({
     },
     keysymFromCodepoint(codepoint) {
       // Keysyms for control characters
-      if (codepoint <= 0x1f || (codepoint >= 0x7f && codepoint <= 0x9f))
-        return 0xff00 | codepoint;
+      if (codepoint <= 0x1f || (codepoint >= 0x7f && codepoint <= 0x9f)) return 0xff00 | codepoint;
 
       // Keysyms for ASCII chars
       if (codepoint >= 0x0000 && codepoint <= 0x00ff) return codepoint;
 
       // Keysyms for Unicode
-      if (codepoint >= 0x0100 && codepoint <= 0x10ffff)
-        return 0x01000000 | codepoint;
+      if (codepoint >= 0x0100 && codepoint <= 0x10ffff) return 0x01000000 | codepoint;
 
       return null;
     },
@@ -1175,10 +1102,7 @@ export default defineComponent({
       }
     },
     dropUploadFile(file, notify) {
-      if (
-        this.token.connection.settings["enable-drive"] === "false" ||
-        this.token.connection.settings["disable-upload"] === "true"
-      ) {
+      if (this.token.connection.settings["enable-drive"] === "false" || this.token.connection.settings["disable-upload"] === "true") {
         this.$message.error(this.$t("message.file.upload.permission.denied"));
         return false;
       }
@@ -1219,11 +1143,7 @@ export default defineComponent({
               this.$notification.open({
                 key,
                 message: this.$t("label.file.upload"),
-                description:
-                  "[" +
-                  this.$t("label.complete") +
-                  "] " +
-                  managedFileUpload.filename,
+                description: "[" + this.$t("label.complete") + "] " + managedFileUpload.filename,
                 placement: "bottomRight",
                 duration: 5,
                 style: {
@@ -1236,20 +1156,14 @@ export default defineComponent({
               });
             }
           } else {
-            managedFileUpload.progress = Math.floor(
-              (offset / bytes.length) * 100
-            );
+            managedFileUpload.progress = Math.floor((offset / bytes.length) * 100);
 
             //percent정보 갱신을 위한 notification
             if (managedFileUpload.notification) {
               this.$notification.open({
                 key,
                 message: this.$t("label.file.upload"),
-                description:
-                  "[" +
-                  managedFileUpload.progress +
-                  "%] " +
-                  managedFileUpload.filename,
+                description: "[" + managedFileUpload.progress + "%] " + managedFileUpload.filename,
                 placement: "bottomRight",
                 duration: 0,
                 style: {

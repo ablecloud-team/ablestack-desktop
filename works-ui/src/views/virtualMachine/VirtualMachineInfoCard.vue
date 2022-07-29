@@ -21,14 +21,13 @@
           <a-badge
             class="head-example"
             :color="
-              resource.instanceDBInfo.mold_status === 'Running'
+              ['Running'].includes(resource.instanceDBInfo.mold_status)
                 ? 'green'
-                : resource.instanceDBInfo.mold_status === 'Stopping' ||
-                  resource.instanceDBInfo.mold_status === 'Starting'
+                : ['Stopping', 'Starting'].includes(resource.instanceDBInfo.mold_status)
                 ? 'blue'
-                : resource.instanceDBInfo.mold_status === 'Stopped'
+                : ['Stopped'].includes(resource.instanceDBInfo.mold_status)
                 ? 'red'
-                : ''
+                : 'grey'
             "
             :text="
               resource.instanceDBInfo.mold_status === 'Running'
@@ -54,30 +53,18 @@
           <a-badge
             class="head-example"
             :color="
-              resource.instanceDBInfo.handshake_status === 'Not Ready' ||
-              resource.instanceDBInfo.handshake_status === 'Pending'
-                ? 'red'
-                : resource.instanceDBInfo.handshake_status === 'Joining' ||
-                  resource.instanceDBInfo.handshake_status === 'Joined'
+              ['Joining', 'Joined'].includes(resource.instanceDBInfo.handshake_status)
                 ? 'yellow'
                 : resource.instanceDBInfo.handshake_status === 'Ready'
                 ? 'green'
                 : 'red'
             "
             :text="
-              resource.instanceDBInfo.handshake_status === 'Not Ready' ||
-              resource.instanceDBInfo.handshake_status === 'Pending'
-                ? $t('label.vm.status.initializing') +
-                  '(' +
-                  resource.instanceDBInfo.handshake_status +
-                  ')'
-                : resource.instanceDBInfo.handshake_status === 'Joining' ||
-                  resource.instanceDBInfo.handshake_status === 'Joined'
-                ? $t('label.vm.status.configuring') +
-                  '(' +
-                  resource.instanceDBInfo.handshake_status +
-                  ')'
-                : resource.instanceDBInfo.handshake_status === 'Ready'
+              ['Not Ready', 'Pending'].includes(resource.instanceDBInfo.handshake_status)
+                ? $t('label.vm.status.initializing') + '(' + resource.instanceDBInfo.handshake_status + ')'
+                : ['Joining', 'Joined'].includes(resource.instanceDBInfo.handshake_status)
+                ? $t('label.vm.status.configuring') + '(' + resource.instanceDBInfo.handshake_status + ')'
+                : ['Ready'].includes(resource.instanceDBInfo.handshake_status)
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "
@@ -102,16 +89,7 @@
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
       <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].cputotal }}</div>
-      <a-progress
-        :percent="
-          parseFloat(
-            resource.instanceMoldInfo.virtualmachine[0].cpuused.split('%')[0]
-          )
-        "
-        size="small"
-        status="active"
-        style="width: 97%"
-      />
+      <a-progress :percent="parseFloat(resource.instanceMoldInfo.virtualmachine[0].cpuused.split('%')[0])" size="small" status="active" style="width: 97%" />
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
@@ -122,39 +100,22 @@
       <div class="Item">
         {{ resource.instanceInstanceVolumeInfo.volume[0].sizegb }}<br />
         <a-tag>
-          {{
-            $t("label.read") +
-            " " +
-            (resource.instanceMoldInfo.virtualmachine[0].diskkbsread / 1048576).toFixed(2)
-          }}
+          {{ $t("label.read") + " " + (resource.instanceMoldInfo.virtualmachine[0].diskkbsread / 1048576).toFixed(2) }}
           GB</a-tag
         >
         <a-tag>
-          {{
-            $t("label.write") +
-            " " +
-            (resource.instanceMoldInfo.virtualmachine[0].diskkbswrite / 1048576).toFixed(2)
-          }}
+          {{ $t("label.write") + " " + (resource.instanceMoldInfo.virtualmachine[0].diskkbswrite / 1048576).toFixed(2) }}
           GB</a-tag
         ><br />
-        <a-tag>
-          {{ $t("label.read.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskioread }}</a-tag
-        >
-        <a-tag>
-          {{ $t("label.write.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskiowrite }}</a-tag
-        >
+        <a-tag> {{ $t("label.read.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskioread }}</a-tag>
+        <a-tag> {{ $t("label.write.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskiowrite }}</a-tag>
       </div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.network") }}</div>
       <div class="Item">
-        <a-tag>
-          <ArrowUpOutlined /> RX {{ resource.instanceMoldInfo.virtualmachine[0].networkkbsread }} KB</a-tag
-        >
-        <a-tag>
-          <ArrowDownOutlined /> TX
-          {{ resource.instanceMoldInfo.virtualmachine[0].networkkbswrite }} KB</a-tag
-        ><br />
+        <a-tag> <ArrowUpOutlined /> RX {{ resource.instanceMoldInfo.virtualmachine[0].networkkbsread }} KB</a-tag>
+        <a-tag> <ArrowDownOutlined /> TX {{ resource.instanceMoldInfo.virtualmachine[0].networkkbswrite }} KB</a-tag><br />
         {{ resource.instanceMoldInfo.virtualmachine[0].nic[0].networkname }} ({{ resource.instanceMoldInfo.virtualmachine[0].nic[0].type }})
       </div>
     </div>

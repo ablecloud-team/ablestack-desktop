@@ -9,40 +9,21 @@
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
-    <template
-      #customFilterDropdown="{
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-        column,
-      }"
-    >
+    <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
       <div style="padding: 8px">
         <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
           style="width: 188px; margin-bottom: 8px; display: block"
-          @change="
-            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
-          "
+          @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <a-button
-          type="primary"
-          size="small"
-          style="width: 90px; margin-right: 8px"
-          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
-        >
+        <a-button type="primary" size="small" style="width: 90px; margin-right: 8px" @click="handleSearch(selectedKeys, confirm, column.dataIndex)">
           <template #icon><search-outlined /></template>
           {{ $t("label.search") }}
         </a-button>
-        <a-button
-          size="small"
-          style="width: 90px"
-          @click="handleReset(clearFilters)"
-        >
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
           {{ $t("label.reset") }}
         </a-button>
       </div>
@@ -55,11 +36,7 @@
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'value'">
         <div>
-          <a-input
-            v-if="editableData[record.name]"
-            v-model:value="editableData[record.name][column.dataIndex]"
-            style="margin: -5px 0"
-          />
+          <a-input v-if="editableData[record.name]" v-model:value="editableData[record.name][column.dataIndex]" style="margin: -5px 0" />
           <template v-else>
             {{ text }}
           </template>
@@ -70,22 +47,14 @@
           <span v-if="editableData[record.name]">
             <a-tooltip placement="bottom">
               <template #title>{{ $t("tooltip.destroy") }}</template>
-              <a-button
-                shape="circle"
-                @click="editCancel(record.name)"
-                size="small"
-              >
+              <a-button shape="circle" @click="editCancel(record.name)" size="small">
                 <CloseCircleOutlined style="color: red" />
               </a-button>
             </a-tooltip>
             &nbsp;
             <a-tooltip placement="bottom">
               <template #title>{{ $t("tooltip.save") }}</template>
-              <a-button
-                shape="circle"
-                @click="editSave(record.name)"
-                size="small"
-              >
+              <a-button shape="circle" @click="editSave(record.name)" size="small">
                 <CheckCircleOutlined style="color: #52c41a" />
               </a-button>
             </a-tooltip>
@@ -93,11 +62,7 @@
           <span v-else>
             <a-tooltip placement="bottom">
               <template #title>{{ $t("tooltip.edit") }}</template>
-              <a-button
-                shape="circle"
-                @click="editAction(record.name)"
-                size="small"
-              >
+              <a-button shape="circle" @click="editAction(record.name)" size="small">
                 <EditOutlined />
               </a-button>
             </a-tooltip>
@@ -110,7 +75,7 @@
 
 <script>
 import { cloneDeep } from "lodash-es";
-import { defineComponent, ref, reactive } from "vue";
+import { defineComponent, ref, reactive, h } from "vue";
 import Actions from "@/components/Actions";
 export default defineComponent({
   components: {
@@ -150,8 +115,7 @@ export default defineComponent({
         // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
-        showTotal: (total) =>
-          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       dataList: [],
@@ -169,8 +133,7 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
           customFilterDropdown: true,
-          onFilter: (value, record) =>
-            record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -183,12 +146,7 @@ export default defineComponent({
           title: this.$t("label.description"),
           dataIndex: "description",
           width: "30%",
-          sorter: (a, b) =>
-            a.description < b.description
-              ? -1
-              : a.description > b.description
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.description < b.description ? -1 : a.description > b.description ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -196,8 +154,7 @@ export default defineComponent({
           dataIndex: "value",
           width: "30%",
           // slots: { customRender: "value" },
-          sorter: (a, b) =>
-            a.value < b.value ? -1 : a.value > b.value ? 1 : 0,
+          sorter: (a, b) => (a.value < b.value ? -1 : a.value > b.value ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -226,8 +183,8 @@ export default defineComponent({
       this.state.searchText = "";
       this.fetchData();
     },
-    async fetchData() {
-      await this.$worksApi
+    fetchData() {
+      this.$worksApi
         .get("/api/v1/configuration")
         .then((response) => {
           if (response.status == 200) {
@@ -249,15 +206,10 @@ export default defineComponent({
         });
     },
     editAction(name) {
-      this.editableData[name] = cloneDeep(
-        this.dataList.filter((item) => name === item.name)[0]
-      );
+      this.editableData[name] = cloneDeep(this.dataList.filter((item) => name === item.name)[0]);
     },
     async editSave(name) {
-      Object.assign(
-        this.dataList.filter((item) => name === item.name)[0],
-        this.editableData[name]
-      );
+      Object.assign(this.dataList.filter((item) => name === item.name)[0], this.editableData[name]);
 
       console.log(this.editableData[name].name, this.editableData[name].value);
       let params = new URLSearchParams();
@@ -266,16 +218,17 @@ export default defineComponent({
       params.append("value", this.editableData[name].value);
 
       try {
-        const res = await this.$worksApi.patch(
-          "/api/v1/configuration/" + this.editableData[name].id,
-          params
-        );
+        const res = await this.$worksApi.patch("/api/v1/configuration/" + this.editableData[name].id, params);
         if (res.status == 200) {
           this.$message.success(
             this.$t("message.configuration.data.update.success", {
               name: this.editableData[name].name,
-            })
+            }),
+            5
           );
+          this.$notification.warning({
+            description: this.$t("message.configuration.data.update.success.restart"),
+          });
         } else {
           this.$message.error(
             this.$t("message.configuration.data.update.fail", {

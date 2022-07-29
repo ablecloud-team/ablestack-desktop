@@ -28,7 +28,7 @@ import UserClient from "@/views/userClient/UserClient.vue";
 
 let menukey = "";
 const adminAuthCheck = (to, from, next) => {
-  //console.log("adminAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
+  // console.log("adminAuthCheck:: " + to.name + ":" + from.name + ":" + next);
   if (to.name.includes("Dashboard")) {
     menukey = "1";
   }
@@ -59,7 +59,7 @@ const adminAuthCheck = (to, from, next) => {
 };
 
 const userAuthCheck = (to, from, next) => {
-  //console.log("userAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
+  // console.log("userAuthCheck:: " + to.name + ":" + from.name + ":" + next);
   if (to.name.includes("Favorite")) {
     menukey = "1";
   }
@@ -73,11 +73,9 @@ const userAuthCheck = (to, from, next) => {
 
 const tokenCheck = (to, from, next, isAdmin) => {
   const isToken = sessionStorage.getItem("token");
+  // console.log("isToken :>> ", isToken);
   if (isToken && isToken !== "") {
-    if (
-      (to.name === "UserFavorite" || to.name === "Dashboard") &&
-      from.name === "Login"
-    ) {
+    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
       goRoute(0, next);
     } else {
       worksApi
@@ -87,10 +85,8 @@ const tokenCheck = (to, from, next, isAdmin) => {
           if (response.status === 200) {
             if (
               /*response.data.result.isAdmin === isAdmin */
-              (isAdmin &&
-                response.data.result.name.toLowerCase() === "administrator") ||
-              (!isAdmin &&
-                response.data.result.name.toLowerCase() !== "administrator")
+              (isAdmin && response.data.result.name.toLowerCase() === "administrator") ||
+              (!isAdmin && response.data.result.name.toLowerCase() !== "administrator")
             ) {
               goRoute(0, next);
             } else {
@@ -272,6 +268,12 @@ const routes = [
         beforeEnter: adminAuthCheck,
       },
     ],
+  },
+  {
+    path: "/clientdc/:crypto",
+    name: "ClientDc",
+    component: UserClient,
+    beforeEnter: adminAuthCheck,
   },
   {
     path: "/user",

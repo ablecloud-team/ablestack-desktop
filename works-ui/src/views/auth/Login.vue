@@ -1,14 +1,7 @@
 <template>
   <div class="user-layout desktop">
     <div style="position: relative z-index: 999;">
-      <a-alert
-        v-if="statusBool"
-        :message="statusMess"
-        :description="statusDesc"
-        :type="statusType"
-        banner
-        show-icon
-      >
+      <a-alert v-if="statusBool" :message="statusMess" :description="statusDesc" :type="statusType" banner show-icon>
         <!-- <template #icon>
           <smile-outlined />
           <smile-outlined v-if="statusType == 'success'" />
@@ -18,28 +11,13 @@
     </div>
     <div class="user-layout-container" style="position: absolute; z-index: 1">
       <div class="user-layout-header">
-        <img
-          src="@/assets/ablestack-logo.png"
-          alt="logo"
-          class="user-layout-logo"
-        />
+        <img src="@/assets/ablestack-logo.png" alt="logo" class="user-layout-logo" />
       </div>
 
       <a-spin :spinning="spinning">
-        <a-form
-          ref="formRef"
-          layout="horizontal"
-          :model="formState"
-          :rules="rules"
-          @finish="onSubmit"
-          class="user-layout-login"
-        >
+        <a-form :ref="formRef" layout="horizontal" :model="form" :rules="rules" @finish="onSubmit" class="user-layout-login">
           <a-form-item has-feedback name="id">
-            <a-input
-              v-model:value="formState.id"
-              :placeholder="$t('label.user.id')"
-              size="large"
-            >
+            <a-input v-model:value="form.id" :placeholder="$t('placeholder.user.account')" size="large">
               <template #prefix>
                 <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
               </template>
@@ -47,42 +25,24 @@
           </a-form-item>
 
           <a-form-item has-feedback name="password">
-            <a-input-password
-              v-model:value="formState.password"
-              type="password"
-              :placeholder="$t('label.password')"
-              size="large"
-              autocomplete="off"
-            >
+            <a-input-password v-model:value="form.password" type="password" :placeholder="$t('placeholder.user.password')" size="large" autocomplete="off">
               <template #prefix>
                 <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
               </template>
             </a-input-password>
           </a-form-item>
           <a-form-item style="margin-bottom: 0">
-            <a-button
-              type="primary"
-              block
-              class="login-button"
-              html-type="submit"
-            >
+            <a-button type="primary" block class="login-button" html-type="submit">
               {{ $t("label.login") }}
             </a-button>
           </a-form-item>
           <!--   언어변환 버튼 start     -->
           <a-dropdown placement="bottomLeft">
             <span>
-              <TranslationOutlined
-                class="login-translation"
-                style="font-size: 20px"
-              />
+              <TranslationOutlined class="login-translation" style="font-size: 20px" />
             </span>
             <template #overlay>
-              <a-menu
-                v-model:selected-keys="formState.language"
-                class="header-dropdown-menu"
-                @click="setLocaleClick"
-              >
+              <a-menu :selected-keys="[language]" class="header-dropdown-menu" @click="setLocaleClick">
                 <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
                 <a-menu-item key="en" value="enUS"> English </a-menu-item>
               </a-menu>
@@ -101,59 +61,42 @@ import { defineComponent, reactive, ref } from "vue";
 export default defineComponent({
   name: "Login",
   components: {},
-  setup() {
-    const formRef = ref();
-    const formState = reactive({
-      id: ref(""),
-      password: ref(""),
-      language: [
-        sessionStorage.getItem("locale") == null
-          ? "ko"
-          : sessionStorage.getItem("locale"),
-      ],
-    });
-    const rules = {
-      id: {
-        required: true,
-        trigger: "change",
-      },
-      password: {
-        required: true,
-        trigger: "change",
-      },
-    };
-    return {
-      formRef,
-      formState,
-      rules,
-    };
-  },
+  setup() {},
   data() {
     return {
       timer: ref(null),
       spinning: ref(true),
-      loadedLanguage: ref[""],
+      language: "ko",
       statusBool: ref(true),
       statusMess: ref(this.$t("message.status.check.worksapi")),
       statusDesc: ref(this.$t("message.status.check.desc.wait")),
       statusType: ref("info"),
     };
   },
+  mounted() {
+    this.language = sessionStorage.getItem("locale") || "ko";
+    this.setLocale(this.language);
+  },
   created() {
+    this.initForm();
+    sessionStorage.clear();
     this.serverCheck();
     this.timer = setInterval(() => {
       this.serverCheck();
     }, 10000);
-
-    this.rules.id.message = this.$t("message.please.enter.your.id");
-    this.rules.password.message = this.$t("message.please.enter.your.password");
-    this.onClear();
-    this.setLocale(this.formState.language[0]);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
+    initForm() {
+      this.formRef = ref();
+      this.form = reactive({});
+      this.rules = {
+        id: { required: true, trigger: "change", message: this.$t("message.please.enter.your.id") },
+        password: { required: true, trigger: "change", message: this.$t("message.please.enter.your.password") },
+      };
+    },
     setLocaleClick(e) {
       let localeValue = e.key;
       if (!localeValue) {
@@ -162,25 +105,21 @@ export default defineComponent({
       this.setLocale(localeValue);
     },
     setLocale(localeValue) {
+      this.language = localeValue;
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
-      this.formState.language = [localeValue];
       sessionStorage.setItem("locale", localeValue);
       //this.loadLanguageAsync(localeValue);
     },
-    onClear() {
-      sessionStorage.clear();
-    },
     onSubmit() {
       let params = new URLSearchParams();
-      this.formRef
+      this.formRef.value
         .validate()
         .then(() => {
           this.$message.destroy();
-          this.$message.loading(this.$t("message.logging"), 60);
-          params.append("id", this.formState.id);
-          params.append("password", this.formState.password);
-
+          this.$message.loading(this.$t("message.logging"), 0);
+          params.append("id", this.form.id);
+          params.append("password", this.form.password);
           this.$worksApi
             .post("/api/login", params)
             .then((response) => {
@@ -189,23 +128,33 @@ export default defineComponent({
               if (response.status === 200 && data.login === true) {
                 this.$store.dispatch("loginCommit", response.data);
                 sessionStorage.setItem("token", data.token);
-                sessionStorage.setItem(
-                  "locale",
-                  sessionStorage.getItem("locale") == null
-                    ? process.env.VUE_APP_I18N_LOCALE
-                    : sessionStorage.getItem("locale")
-                );
+                sessionStorage.setItem("locale", sessionStorage.getItem("locale") == null ? process.env.VUE_APP_I18N_LOCALE : sessionStorage.getItem("locale"));
                 sessionStorage.setItem("userName", data.username);
                 sessionStorage.setItem("isAdmin", data.isAdmin);
                 sessionStorage.setItem("clusterName", data.clusterName);
                 sessionStorage.setItem("domainName", data.domainName);
-                if (data.username.toLowerCase() === "administrator") {
-                  this.$router.push({ name: "Dashboard" });
-                } else {
-                  this.$router.push({ name: "UserDesktop" });
-                }
+
+                this.$worksApi
+                  .get("/api/v1/configuration")
+                  .then((response) => {
+                    console.log(response.data);
+                    if (response.status === 200) {
+                      const dcurl = response.data.result.filter((it) => it.name == "dc.default.url")[0].value;
+                      const worksurl = response.data.result.filter((it) => it.name == "works.default.url")[0].value;
+                      sessionStorage.setItem("dcurl", dcurl);
+                      sessionStorage.setItem("worksurl", worksurl);
+                      if (data.username.toLowerCase() === "administrator") {
+                        this.$router.push({ name: "Dashboard" });
+                      } else {
+                        this.$router.push({ name: "UserDesktop" });
+                      }
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
                 this.$message.destroy();
-                this.$message.success(this.$t("message.login.completed"));
+                this.$message.success(this.$t("message.login.completed"), 5);
               } else {
                 this.$message.destroy();
                 this.$message.error(this.$t("message.login.wrong"));
@@ -234,24 +183,24 @@ export default defineComponent({
           if (response.status === 200) {
             this.statCheck(response.data.result);
           } else {
-            this.setStatView(400, "worksapi", "error", 300);
+            this.setStatView(400, "worksapi", "error", 200);
           }
         })
         .catch((error) => {
-          this.setStatView(400, "worksapi", "error", 300);
+          this.setStatView(400, "worksapi", "error", 200);
           // console.log(error.message);
         })
         .finally(() => {});
     },
     async statCheck(data) {
       // console.log(data.Mold, data["Works-DC"], data["Works-Samba"]);
-      var res = await this.setStatView(data["Mold"], "moldapi", "info", 300);
+      var res = await this.setStatView(data["Mold"], "moldapi", "info", 200);
       if (!res) return false;
-      res = await this.setStatView(data["Works-DC"], "dc", "info", 300);
+      res = await this.setStatView(data["Works-DC"], "dc", "info", 200);
       if (!res) return false;
-      res = await this.setStatView(data["Works-Samba"], "ad", "info", 300);
+      res = await this.setStatView(data["Works-Samba"], "ad", "info", 200);
       if (!res) return false;
-      await this.setStatView(200, "all", "success", 1000);
+      await this.setStatView(200, "all", "success", 500);
     },
     setStatView(stat, cd, type, time) {
       const _t = this;

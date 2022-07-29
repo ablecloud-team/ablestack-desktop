@@ -15,7 +15,7 @@ const clientOptions = {
       key: 'MySuperSecretKeyForParamsToken12'
   },
   log: {
-    level: 'DEBUG',
+    level: 'NORMAL',
     stdLog: (...args) => {
         console.log('[MyLog]', ...args)
     },

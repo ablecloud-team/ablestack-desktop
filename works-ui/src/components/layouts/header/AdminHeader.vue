@@ -1,50 +1,41 @@
 <template>
   <a-row type="flex">
     <a-col :flex="1">
-      <menu-unfold-outlined
-        v-if="state.collapsed"
-        class="menu-collapsed"
-        @click="setCollapsed()"
-      />
-      <menu-fold-outlined
-        v-else
-        class="menu-collapsed"
-        @click="setCollapsed()"
-      />
+      <menu-unfold-outlined v-if="state.collapsed" class="menu-collapsed" @click="setCollapsed()" />
+      <menu-fold-outlined v-else class="menu-collapsed" @click="setCollapsed()" />
     </a-col>
     <a-col :flex="4" class="header-col-right">
-      【 {{ $t("label.cluster") }} : {{ clusterName }} ㅣ
-      {{ $t("label.domain") }} : {{ domainName }} 】
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <a-dropdown placement="bottomLeft">
-        <span>
-          <TranslationOutlined class="header-col" />
+      <span class="header-col"> 【 {{ $t("label.cluster") }} : {{ clusterName }} ㅣ {{ $t("label.domain") }} : {{ domainName }} 】 </span>
+      <a-dropdown placement="bottom">
+        <span class="header-col">
+          <TranslationOutlined />
         </span>
         <template #overlay>
-          <a-menu
-            v-model:selectedKeys="state.language"
-            class="header-dropdown-menu"
-            @click="setLocaleClick"
-          >
+          <a-menu :selected-keys="[language]" class="header-dropdown-menu" @click="setLocaleClick">
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <a-dropdown placement="bottomLeft">
-        <span>
-          <UserOutlined class="header-col" />
+      <a-dropdown placement="bottom">
+        <span class="header-col">
+          <UserOutlined />
           {{ userName }}
         </span>
         <template #overlay>
-          <a-menu>
-            <a-menu-item key="1" @click="userinfo">
-              <UserOutlined /> {{ $t("label.profile") }}
+          <a-menu class="header-dropdown-menu">
+            <a-menu-item key="1" @click="accountInfo">
+              <UserOutlined />
+              <span style="margin: 10px"> {{ $t("label.profile") }} </span>
+            </a-menu-item>
+            <a-menu-item key="2" @click="dcConWebClient">
+              <control-outlined />
+              <span style="margin: 10px"> {{ $t("label.dcvm.connect") }}</span>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item key="2" @click="logoutSubmit">
-              <LogoutOutlined /> {{ $t("label.logout") }}
+            <a-menu-item key="3" @click="logoutSubmit">
+              <LogoutOutlined />
+              <span style="margin: 10px">{{ $t("label.logout") }}</span>
             </a-menu-item>
           </a-menu>
         </template>
@@ -66,11 +57,6 @@ export default defineComponent({
   setup(props) {
     const state = reactive({
       collapsed: ref(props.collapsed),
-      language: [
-        sessionStorage.getItem("locale") == null
-          ? "ko"
-          : sessionStorage.getItem("locale"),
-      ],
     });
     return {
       state,
@@ -78,7 +64,9 @@ export default defineComponent({
   },
   data() {
     return {
-      loadedLanguage: ref[""],
+      cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
+      cryptIv: "zxy0123456789abc",
+      language: sessionStorage.getItem("locale") || "ko",
       userName: ref(""),
     };
   },
@@ -91,8 +79,6 @@ export default defineComponent({
     this.userName = sessionStorage.getItem("userName");
     this.clusterName = sessionStorage.getItem("clusterName");
     this.domainName = sessionStorage.getItem("domainName");
-
-    this.setLocale(this.state.language[0]);
   },
   methods: {
     setCollapsed() {
@@ -105,20 +91,17 @@ export default defineComponent({
         localeValue = "ko";
       }
       this.setLocale(localeValue);
-      // setTimeout(() => {
-      //   location.reload();
-      // }, 0);
     },
     setLocale(localeValue) {
+      this.language = localeValue;
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
-      this.state.language = [localeValue];
       sessionStorage.setItem("locale", localeValue);
     },
     async logoutSubmit() {
       const res = await axiosLogout();
       if (res.data.result.login === false || res.data.result.status > 200) {
-        this.$message.success(this.$t("message.logout.success"), 2);
+        this.$message.success(this.$t("message.logout.success"), 5);
         await this.$store.dispatch("logoutCommit");
         await this.$router.push({ name: "Login" });
       }
@@ -137,28 +120,43 @@ export default defineComponent({
     //     messages[lang] = message;
     //   }
     // },
-    userinfo() {
+    accountInfo() {
       this.$router.push({ path: "/accountDetail/" + this.userName });
+    },
+    dcConWebClient() {
+      const liteParamArr = {};
+      liteParamArr["client-name"] = "ABLESTACK Works";
+      liteParamArr["hostname"] = sessionStorage.getItem("dcurl");
+      liteParamArr["password"] = "Ablecloud1!";
+      liteParamArr["username"] = sessionStorage.getItem("userName");
+      liteParamArr["domain"] = sessionStorage.getItem("domainName");
+      // liteParamArr["enable-touch"] = true;
+      console.log(liteParamArr);
+
+      const cipher = this.$CryptoJS.AES.encrypt(JSON.stringify(liteParamArr), this.$CryptoJS.enc.Utf8.parse(this.cryptKey), {
+        iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+        padding: this.$CryptoJS.pad.Pkcs7,
+        mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+      });
+      const encrypted = btoa(cipher.toString());
+      window.open("/clientdc/" + encrypted, "_blank");
     },
   },
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
 <style>
 .header-col-right {
-  font-size: 16px;
   text-align: right;
-  margin-right: 10px;
 }
 .header-col {
-  font-size: 18px;
-  /* margin-left: 20px; */
+  font-size: 16px;
+  margin-right: 20px;
 }
 
 .header-dropdown-menu {
-  width: 100px;
+  width: 110%;
 }
 .menu-collapsed {
   font-size: 18px;

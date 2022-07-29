@@ -1,6 +1,6 @@
 <template>
   <a-row :gutter="[8, 8]" type="flex" justify="center" align="top">
-    <a-col flex="214px">
+    <a-col flex="230px">
       <h3>{{ $t("label.input.mode") }}</h3>
       <a-radio-group
         v-model:value="setText"
@@ -29,7 +29,7 @@
         </a-tooltip> -->
       </a-radio-group>
     </a-col>
-    <a-col flex="214px">
+    <a-col flex="230px">
       <h3>{{ $t("label.mouse.mode") }}</h3>
       <a-radio-group
         v-model:value="setMouse"
@@ -52,7 +52,7 @@
         </a-tooltip>
       </a-radio-group>
     </a-col>
-    <a-col flex="214px">
+    <a-col flex="230px">
       <h3>{{ $t("label.display") }}</h3>
       <a-button @click="zoomHandle(-10)" shape="circle">
         <template #icon><MinusOutlined /></template>
@@ -95,7 +95,7 @@
         </a-tooltip>
       </a-radio-group>
     </a-col>
-    <a-col flex="214px">
+    <a-col flex="230px">
       <h3>{{ $t("label.filesystem") }}</h3>
       <a-tooltip
         placement="bottom"
@@ -121,7 +121,7 @@
         </a-button>
       </a-tooltip>
     </a-col>
-    <a-col flex="214px"></a-col>
+    <a-col flex="230px"></a-col>
   </a-row>
   <a-modal
     v-model:visible="uploadModal"

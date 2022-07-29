@@ -30,11 +30,7 @@
       <a-list-item>
         <strong>{{ $t("label.users") }}</strong>
         <br />
-        {{
-          resource.instanceDBInfo.owner_account_id == ""
-            ? $t("label.owner.account.false")
-            : resource.instanceDBInfo.owner_account_id
-        }}
+        {{ resource.instanceDBInfo.owner_account_id == "" ? $t("label.owner.account.false") : resource.instanceDBInfo.owner_account_id }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.vm.session.count") }}</strong>
@@ -57,10 +53,7 @@
         {{ resource.instanceMoldInfo.virtualmachine[0].pooltype }}
       </a-list-item>
     </a-list>
-    <a-list
-      v-if="actionFrom === 'UserDetail' || actionFrom === 'ACDetail'"
-      item-layout="horizontal"
-    >
+    <a-list v-if="actionFrom === 'UserDetail' || actionFrom === 'ACDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong>
         <br />

@@ -12,40 +12,21 @@
     }"
   >
     <!-- 검색 필터링 template-->
-    <template
-      #customFilterDropdown="{
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-        column,
-      }"
-    >
+    <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
       <div style="padding: 8px">
         <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
           style="width: 188px; margin-bottom: 8px; display: block"
-          @change="
-            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
-          "
+          @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <a-button
-          type="primary"
-          size="small"
-          style="width: 90px; margin-right: 8px"
-          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
-        >
+        <a-button type="primary" size="small" style="width: 90px; margin-right: 8px" @click="handleSearch(selectedKeys, confirm, column.dataIndex)">
           <template #icon><search-outlined /></template>
           {{ $t("label.search") }}
         </a-button>
-        <a-button
-          size="small"
-          style="width: 90px"
-          @click="handleReset(clearFilters)"
-        >
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
           {{ $t("label.reset") }}
         </a-button>
       </div>
@@ -62,21 +43,14 @@
         </router-link>
       </template>
       <template v-if="column.dataIndex === 'workspace_name'">
-        <router-link
-          :to="{ path: '/workspaceDetail/' + record.workspace_uuid }"
-        >
+        <router-link :to="{ path: '/workspaceDetail/' + record.workspace_uuid }">
           {{ text }}
         </router-link>
       </template>
       <template v-if="column.dataIndex === 'action'">
         <a-Popover placement="topLeft">
           <template #content>
-            <Actions
-              v-if="actionFrom === 'VMList'"
-              :action-from="actionFrom"
-              :vm-info="record"
-              @fetchData="fetchRefresh"
-            />
+            <Actions v-if="actionFrom === 'VMList'" :action-from="actionFrom" :vm-info="record" @fetchData="fetchRefresh" />
           </template>
           <MoreOutlined />
         </a-Popover>
@@ -88,14 +62,13 @@
         <a-badge
           class="head-example"
           :color="
-            record.mold_status === 'Running'
+            ['Running'].includes(record.mold_status)
               ? 'green'
-              : record.mold_status === 'Stopping' ||
-                record.mold_status === 'Starting'
+              : ['Stopping', 'Starting'].includes(record.mold_status)
               ? 'blue'
-              : record.mold_status === 'Stopped'
+              : ['Stopped'].includes(record.mold_status)
               ? 'red'
-              : ''
+              : 'grey'
           "
           :text="
             record.mold_status === 'Running'
@@ -115,31 +88,13 @@
           <template #title>{{ record.handshake_status }}</template>
           <a-badge
             class="head-example"
-            :color="
-              record.handshake_status === 'Not Ready' ||
-              record.handshake_status === 'Pending'
-                ? 'red'
-                : record.handshake_status === 'Joining' ||
-                  record.handshake_status === 'Joined'
-                ? 'yellow'
-                : record.handshake_status === 'Ready'
-                ? 'green'
-                : 'red'
-            "
+            :color="['Joining', 'Joined'].includes(record.handshake_status) ? 'yellow' : record.handshake_status === 'Ready' ? 'green' : 'red'"
             :text="
-              record.handshake_status === 'Not Ready' ||
-              record.handshake_status === 'Pending'
-                ? $t('label.vm.status.initializing') +
-                  '(' +
-                  record.handshake_status +
-                  ')'
-                : record.handshake_status === 'Joining' ||
-                  record.handshake_status === 'Joined'
-                ? $t('label.vm.status.configuring') +
-                  '(' +
-                  record.handshake_status +
-                  ')'
-                : record.handshake_status === 'Ready'
+              ['Not Ready', 'Pending'].includes(record.handshake_status)
+                ? $t('label.vm.status.initializing') + '(' + record.handshake_status + ')'
+                : ['Joining', 'Joined'].includes(record.handshake_status)
+                ? $t('label.vm.status.configuring') + '(' + record.handshake_status + ')'
+                : ['Ready'].includes(record.handshake_status)
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "
@@ -147,9 +102,7 @@
         </a-tooltip>
       </template>
       <template v-if="column.dataIndex === 'owner_account_id'">
-        <router-link
-          :to="{ path: '/accountDetail/' + record.owner_account_id }"
-        >
+        <router-link :to="{ path: '/accountDetail/' + record.owner_account_id }">
           {{ text }}
         </router-link>
       </template>
@@ -200,8 +153,7 @@ export default defineComponent({
         // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
-        showTotal: (total) =>
-          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       vmDataList: ref([]),
@@ -220,8 +172,7 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
           customFilterDropdown: true,
-          onFilter: (value, record) =>
-            record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -243,12 +194,7 @@ export default defineComponent({
           dataIndex: "workspace_name",
           key: "workspace_name",
           width: "15%",
-          sorter: (a, b) =>
-            a.workspace_name < b.workspace_name
-              ? -1
-              : a.workspace_name > b.workspace_name
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.workspace_name < b.workspace_name ? -1 : a.workspace_name > b.workspace_name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
           // slots: { customRender: "workspaceRender" },
@@ -263,12 +209,7 @@ export default defineComponent({
           //   filterDropdown: "filterDropdown",
           //   filterIcon: "filterIcon",
           // },
-          sorter: (a, b) =>
-            a.workspace_type < b.workspace_type
-              ? -1
-              : a.workspace_type > b.workspace_type
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.workspace_type < b.workspace_type ? -1 : a.workspace_type > b.workspace_type ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
           //filterMultiple: false,
@@ -283,11 +224,7 @@ export default defineComponent({
           //   },
           // ]
           customFilterDropdown: true,
-          onFilter: (value, record) =>
-            record.workspace_type
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
+          onFilter: (value, record) => record.workspace_type.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -301,12 +238,7 @@ export default defineComponent({
           dataIndex: "owner_account_id",
           key: "owner_account_id",
           width: "10%",
-          sorter: (a, b) =>
-            a.owner_account_id < b.owner_account_id
-              ? -1
-              : a.owner_account_id > b.owner_account_id
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // slots: { customRender: "userRender" },
         },
@@ -315,8 +247,7 @@ export default defineComponent({
           dataIndex: "status",
           key: "status",
           width: "10%",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
+          sorter: (a, b) => (a.state < b.state ? -1 : a.status > b.status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // slots: { customRender: "vmStateRender" },
         },
@@ -325,12 +256,7 @@ export default defineComponent({
           dataIndex: "handshake_status",
           key: "handshake_status",
           width: "20%",
-          sorter: (a, b) =>
-            a.handshake_status < b.handshake_status
-              ? -1
-              : a.handshake_status > b.handshake_status
-              ? 1
-              : 0,
+          sorter: (a, b) => (a.handshake_status < b.handshake_status ? -1 : a.handshake_status > b.handshake_status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // slots: { customRender: "vmReadyStateRender" },
         },
@@ -339,8 +265,7 @@ export default defineComponent({
           dataIndex: "ipaddress",
           key: "ipaddress",
           width: "15%",
-          sorter: (a, b) =>
-            a.ipaddress < b.ipaddress ? -1 : a.ipaddress > b.ipaddress ? 1 : 0,
+          sorter: (a, b) => (a.ipaddress < b.ipaddress ? -1 : a.ipaddress > b.ipaddress ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -348,8 +273,7 @@ export default defineComponent({
           dataIndex: "connected",
           key: "connected",
           width: "10%",
-          sorter: (a, b) =>
-            a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
+          sorter: (a, b) => (a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // slots: { customRender: "sessionRender" },
         },
@@ -412,5 +336,4 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

@@ -4,26 +4,17 @@
       <a-layout-header id="content-header">
         <div>
           <a-row>
-            <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath
-                :paths="[{ name: resource.username, component: null }]"
-              />
-              <a-button
-                shape="round"
-                style="margin-left: 20px"
-                size="small"
-                @click="refresh()"
-              >
+              <Apath :paths="[{ name: resource.username, component: null }]" />
+              <a-button shape="round" style="margin-left: 20px" size="small" @click="refresh()">
                 <template #icon><ReloadOutlined /></template>
                 {{ $t("label.refresh") }}
               </a-button>
             </a-col>
 
-            <!-- 왼쪽 액션
             <a-col id="content-action" :span="12">
-              <Actions :action-from="actionFrom" />
-            </a-col> -->
+              <Actions v-if="actionFrom" :action-from="actionFrom" :account-info="resource" />
+            </a-col>
           </a-row>
         </div>
       </a-layout-header>
@@ -80,7 +71,7 @@ export default defineComponent({
           this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
-      this.actionFrom = "UserDetail";
+      this.actionFrom = "USDetail";
     },
   },
 });
